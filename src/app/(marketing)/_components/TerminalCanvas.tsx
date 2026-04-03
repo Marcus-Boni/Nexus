@@ -1,18 +1,18 @@
-'use client'
-import { useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import * as THREE from 'three'
+"use client";
+import { useRef } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 
 function TerminalMesh() {
-  const groupRef = useRef<THREE.Group>(null)
+  const groupRef = useRef<THREE.Group>(null);
 
   useFrame(({ clock }) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y = Math.sin(clock.elapsedTime * 0.3) * 0.15
-      groupRef.current.rotation.x = Math.sin(clock.elapsedTime * 0.2) * 0.05
-      groupRef.current.position.y = Math.sin(clock.elapsedTime * 0.5) * 0.05
+      groupRef.current.rotation.y = Math.sin(clock.elapsedTime * 0.3) * 0.15;
+      groupRef.current.rotation.x = Math.sin(clock.elapsedTime * 0.2) * 0.05;
+      groupRef.current.position.y = Math.sin(clock.elapsedTime * 0.5) * 0.05;
     }
-  })
+  });
 
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
@@ -37,28 +37,28 @@ function TerminalMesh() {
         />
       </mesh>
     </group>
-  )
+  );
 }
 
 function Particles() {
-  const pointsRef = useRef<THREE.Points>(null)
+  const pointsRef = useRef<THREE.Points>(null);
 
   const positions = (() => {
-    const count = 80
-    const pos = new Float32Array(count * 3)
+    const count = 80;
+    const pos = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 10
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 6
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 4 - 1
+      pos[i * 3] = (Math.random() - 0.5) * 10;
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 6;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 4 - 1;
     }
-    return pos
-  })()
+    return pos;
+  })();
 
   useFrame(({ clock }) => {
     if (pointsRef.current) {
-      pointsRef.current.rotation.y = clock.elapsedTime * 0.02
+      pointsRef.current.rotation.y = clock.elapsedTime * 0.02;
     }
-  })
+  });
 
   return (
     <points ref={pointsRef}>
@@ -67,14 +67,15 @@ function Particles() {
       </bufferGeometry>
       <pointsMaterial color="#6366f1" size={0.04} transparent opacity={0.5} />
     </points>
-  )
+  );
 }
 
 export function TerminalCanvas() {
   return (
     <Canvas
       camera={{ position: [0, 0, 4], fov: 45 }}
-      style={{ background: 'transparent' }}
+      gl={{ alpha: true }}
+      style={{ background: "transparent" }}
     >
       <ambientLight intensity={0.4} />
       <pointLight position={[3, 3, 3]} intensity={1.5} color="#6366f1" />
@@ -82,5 +83,5 @@ export function TerminalCanvas() {
       <TerminalMesh />
       <Particles />
     </Canvas>
-  )
+  );
 }

@@ -1,18 +1,18 @@
-'use client'
-import dynamic from 'next/dynamic'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+"use client";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 const TerminalCanvas = dynamic(
-  () => import('./TerminalCanvas').then((m) => m.TerminalCanvas),
-  { ssr: false, loading: () => <div className="h-full w-full" /> }
-)
+  () => import("./TerminalCanvas").then((m) => m.TerminalCanvas),
+  { ssr: false, loading: () => <div className="h-full w-full" /> },
+);
 
 export function Hero() {
   return (
     <section
       className="relative overflow-hidden px-4 pt-24 pb-0"
-      style={{ background: 'var(--landing-bg)' }}
+      style={{ background: "var(--landing-bg)" }}
     >
       {/* Grid background */}
       <div
@@ -22,17 +22,22 @@ export function Hero() {
             linear-gradient(var(--landing-grid) 1px, transparent 1px),
             linear-gradient(90deg, var(--landing-grid) 1px, transparent 1px)
           `,
-          backgroundSize: '40px 40px',
+          backgroundSize: "40px 40px",
         }}
       />
 
       <div className="relative mx-auto max-w-5xl text-center">
         {/* Beta badge */}
-        <div className="mb-8 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm"
-          style={{ borderColor: 'var(--landing-border)', color: 'var(--landing-text-2)' }}>
+        <div
+          className="mb-8 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm"
+          style={{
+            borderColor: "var(--landing-border)",
+            color: "var(--landing-text-2)",
+          }}
+        >
           <span
             className="h-2 w-2 rounded-full bg-green-500"
-            style={{ animation: 'pulse-dot 2s ease-in-out infinite' }}
+            style={{ animation: "pulse-dot 2s ease-in-out infinite" }}
           />
           Now in beta — open for teams
         </div>
@@ -40,12 +45,21 @@ export function Hero() {
         {/* Headline */}
         <h1
           className="mb-6 font-semibold leading-none tracking-tight"
-          style={{ fontSize: 'clamp(48px, 8vw, 80px)', letterSpacing: '-0.04em' }}
+          style={{
+            fontSize: "clamp(48px, 8vw, 80px)",
+            letterSpacing: "-0.04em",
+          }}
         >
-          <span style={{ color: 'var(--landing-text-1)', display: 'block' }}>
+          <span style={{ color: "var(--landing-text-1)", display: "block" }}>
             One platform.
           </span>
-          <span style={{ color: 'var(--landing-text-1)', opacity: 0.5, display: 'block' }}>
+          <span
+            style={{
+              color: "var(--landing-text-1)",
+              opacity: 0.5,
+              display: "block",
+            }}
+          >
             Every agent.
           </span>
         </h1>
@@ -53,10 +67,10 @@ export function Hero() {
         {/* Subline */}
         <p
           className="mx-auto mb-10 max-w-xl text-[17px] leading-relaxed"
-          style={{ color: 'var(--landing-text-2)' }}
+          style={{ color: "var(--landing-text-2)" }}
         >
-          Connect Claude Code, Gemini CLI, Codex and more.
-          Share context. Ship faster.
+          Connect Claude Code, Gemini CLI, Codex and more. Share context. Ship
+          faster.
         </p>
 
         {/* CTAs */}
@@ -75,5 +89,5 @@ export function Hero() {
         </div>
       </div>
     </section>
-  )
+  );
 }

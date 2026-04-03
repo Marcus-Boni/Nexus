@@ -71,12 +71,8 @@
           "name": "agent_sessions_project_id_projects_id_fk",
           "tableFrom": "agent_sessions",
           "tableTo": "projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -84,12 +80,8 @@
           "name": "agent_sessions_user_id_users_id_fk",
           "tableFrom": "agent_sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -187,12 +179,8 @@
           "name": "context_nodes_project_id_projects_id_fk",
           "tableFrom": "context_nodes",
           "tableTo": "projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -200,12 +188,8 @@
           "name": "context_nodes_session_id_agent_sessions_id_fk",
           "tableFrom": "context_nodes",
           "tableTo": "agent_sessions",
-          "columnsFrom": [
-            "session_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["session_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -260,12 +244,8 @@
           "name": "node_links_source_node_id_context_nodes_id_fk",
           "tableFrom": "node_links",
           "tableTo": "context_nodes",
-          "columnsFrom": [
-            "source_node_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["source_node_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -273,12 +253,8 @@
           "name": "node_links_target_node_id_context_nodes_id_fk",
           "tableFrom": "node_links",
           "tableTo": "context_nodes",
-          "columnsFrom": [
-            "target_node_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["target_node_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -354,12 +330,8 @@
           "name": "projects_user_id_users_id_fk",
           "tableFrom": "projects",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -440,9 +412,7 @@
       "indexes": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },

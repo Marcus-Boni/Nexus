@@ -21,6 +21,11 @@
       "sourceType": "github",
       "computedHash": "addf4358803d7746f7fe0475a3370d835775217e00dd5fc7bbd8a7d6c53d81e5"
     },
+    "threejs-pro": {
+      "source": "404kidwiz/claude-supercode-skills",
+      "sourceType": "github",
+      "computedHash": "d301a9fda758128cea3259a7578c0a0b5f0cf871d8f684476dd231f301ae4f7d"
+    },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
