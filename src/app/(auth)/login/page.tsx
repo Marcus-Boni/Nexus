@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { signIn } from 'next-auth/react'
@@ -26,7 +26,7 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
+    resolver: (zodResolver(loginSchema as unknown as Parameters<typeof zodResolver>[0]) as unknown) as Resolver<LoginForm>,
   })
 
   const onSubmit = async (data: LoginForm) => {

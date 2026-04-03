@@ -10,9 +10,9 @@ export function Navbar() {
   const [open, setOpen] = useState(false)
 
   const navLinks = [
-    { href: '#features', label: 'Features' },
-    { href: '#how-it-works', label: 'How it works' },
-    { href: '#docs', label: 'Docs' },
+    { href: '#features' as unknown as '/', label: 'Features' },
+    { href: '#how-it-works' as unknown as '/', label: 'How it works' },
+    { href: '#docs' as unknown as '/', label: 'Docs' },
   ]
 
   return (
