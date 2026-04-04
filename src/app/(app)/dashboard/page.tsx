@@ -1,6 +1,6 @@
-import { auth } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
 import { FolderPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { auth } from "@/lib/auth";
 
 const placeholderStats = [
   { label: "Your Projects", value: "0" },

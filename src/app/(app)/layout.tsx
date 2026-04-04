@@ -1,10 +1,12 @@
-import Link from "next/link";
-import type { Route } from "next";
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { LayoutDashboard, FolderOpen, Terminal, GitGraph } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { FolderOpen, GitGraph, LayoutDashboard, Terminal } from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { BrandLockup } from "@/components/brand/BrandLockup";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { auth } from "@/lib/auth";
 
 interface NavItem {
   href: Route;
@@ -29,7 +31,6 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
       <aside
         className="hidden w-56 flex-col justify-between border-r p-4 lg:flex"
         style={{
@@ -42,7 +43,7 @@ export default async function AppLayout({
             href={"/dashboard" as Route}
             className="mb-8 flex items-center gap-2 font-semibold"
           >
-            ⬡ Nexus
+            <BrandLockup compact />
           </Link>
           <nav className="flex flex-col gap-1">
             {navItems.map((item) => (
@@ -75,7 +76,6 @@ export default async function AppLayout({
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="flex flex-1 flex-col">
         <header
           className="flex h-14 items-center border-b px-6"
@@ -85,7 +85,7 @@ export default async function AppLayout({
             className="text-sm font-medium"
             style={{ color: "var(--landing-text-2)" }}
           >
-            Nexus
+            Workspace
           </h1>
         </header>
         <main className="flex-1 p-6">{children}</main>

@@ -1,11 +1,16 @@
+"use client";
+// Needed for subtle reveal animation on the graph demo card.
+
+import { motion, useReducedMotion } from "motion/react";
+
 const graphNodes = [
   { id: "d1", type: "decision", label: "Use Drizzle ORM", x: 120, y: 80 },
-  { id: "a1", type: "artifact", label: "schema.ts", x: 280, y: 50 },
-  { id: "i1", type: "insight", label: "libSQL faster locally", x: 200, y: 180 },
-  { id: "d2", type: "decision", label: "SQLite in dev", x: 380, y: 140 },
-  { id: "e1", type: "error", label: "Migration failed", x: 60, y: 200 },
-  { id: "a2", type: "artifact", label: "db/index.ts", x: 320, y: 230 },
-];
+  { id: "a1", type: "artifact", label: "schema.ts", x: 292, y: 46 },
+  { id: "i1", type: "insight", label: "libSQL faster locally", x: 204, y: 176 },
+  { id: "d2", type: "decision", label: "SQLite in dev", x: 400, y: 132 },
+  { id: "e1", type: "error", label: "Migration failed", x: 62, y: 214 },
+  { id: "a2", type: "artifact", label: "db/index.ts", x: 318, y: 242 },
+] as const;
 
 const edges = [
   { from: "d1", to: "a1" },
@@ -13,7 +18,7 @@ const edges = [
   { from: "i1", to: "d2" },
   { from: "d2", to: "a2" },
   { from: "e1", to: "i1" },
-];
+] as const;
 
 const nodeColors: Record<string, string> = {
   decision: "var(--node-decision)",
@@ -23,10 +28,10 @@ const nodeColors: Record<string, string> = {
 };
 
 const nodeBorder: Record<string, string> = {
-  decision: "#3b82f6",
-  artifact: "#22c55e",
-  insight: "#eab308",
-  error: "#ef4444",
+  decision: "#4f7cff",
+  artifact: "#34d399",
+  insight: "#f4c84c",
+  error: "#ff7a7a",
 };
 
 const legendItems = [
@@ -34,108 +39,173 @@ const legendItems = [
   { type: "artifact", label: "Artifact" },
   { type: "insight", label: "Insight" },
   { type: "error", label: "Error" },
-];
+] as const;
 
 function getNodeById(id: string) {
-  return graphNodes.find((n) => n.id === id);
+  return graphNodes.find((node) => node.id === id);
 }
 
 export function GraphDemo() {
-  return (
-    <section className="py-24 px-4">
-      <div className="mx-auto max-w-4xl text-center">
-        <h2
-          className="mb-4 text-3xl font-semibold tracking-tight"
-          style={{ color: "var(--landing-text-1)" }}
-        >
-          The knowledge graph
-        </h2>
-        <p
-          className="mx-auto mb-12 max-w-lg text-base"
-          style={{ color: "var(--landing-text-2)" }}
-        >
-          Every decision and artifact from every agent, connected and queryable.
-          Context that compounds over time.
-        </p>
+  const shouldReduceMotion = useReducedMotion();
 
-        {/* Graph card */}
-        <div
-          className="relative rounded-2xl border p-6"
+  return (
+    <section id="graph-demo" className="px-4 py-24 sm:px-6">
+      <div className="mx-auto max-w-5xl">
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <p
+            className="mb-4 text-xs font-medium uppercase tracking-[0.34em]"
+            style={{ color: "var(--landing-text-3)" }}
+          >
+            Shared memory
+          </p>
+          <h2
+            className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl"
+            style={{ color: "var(--landing-text-1)" }}
+          >
+            Decisions stop disappearing inside terminal scrollback.
+          </h2>
+          <p
+            className="mt-4 text-base leading-7"
+            style={{ color: "var(--landing-text-2)" }}
+          >
+            The graph view gives structure to what your agents already know, so
+            context can compound instead of resetting every time you swap tools.
+          </p>
+        </div>
+
+        <motion.div
+          initial={
+            shouldReduceMotion ? undefined : { opacity: 0, scale: 0.98, y: 18 }
+          }
+          whileInView={
+            shouldReduceMotion ? undefined : { opacity: 1, scale: 1, y: 0 }
+          }
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.55, ease: "easeOut" }}
+          className="relative overflow-hidden rounded-[32px] border p-6 sm:p-8"
+          aria-label="Knowledge graph"
           style={{
-            background: "var(--landing-card)",
             borderColor: "var(--landing-border)",
+            background:
+              "linear-gradient(180deg, color-mix(in srgb, var(--landing-card-strong) 88%, transparent), color-mix(in srgb, var(--landing-surface) 94%, transparent))",
+            boxShadow: "0 36px 100px -62px var(--landing-shadow)",
           }}
         >
-          <svg
-            viewBox="0 0 460 280"
-            className="w-full"
-            style={{ maxHeight: 280 }}
-          >
-            {/* Edges */}
-            {edges.map((edge) => {
-              const from = getNodeById(edge.from);
-              const to = getNodeById(edge.to);
-              if (!from || !to) return null;
-              return (
-                <line
-                  key={`${edge.from}-${edge.to}`}
-                  x1={from.x + 40}
-                  y1={from.y + 14}
-                  x2={to.x + 40}
-                  y2={to.y + 14}
-                  stroke="var(--landing-border-hover)"
-                  strokeWidth={1.5}
-                />
-              );
-            })}
-            {/* Nodes */}
-            {graphNodes.map((node) => (
-              <g key={node.id}>
-                <rect
-                  x={node.x}
-                  y={node.y}
-                  width={80}
-                  height={28}
-                  rx={6}
-                  fill={nodeColors[node.type] ?? "var(--landing-card)"}
-                  stroke={nodeBorder[node.type] ?? "var(--landing-border)"}
-                  strokeWidth={1}
-                />
-                <text
-                  x={node.x + 40}
-                  y={node.y + 18}
-                  textAnchor="middle"
-                  fontSize={9}
-                  fill="currentColor"
-                  style={{ color: "var(--landing-text-1)" }}
-                >
-                  {node.label}
-                </text>
-              </g>
-            ))}
-          </svg>
+          <div
+            className="pointer-events-none absolute inset-0 opacity-70"
+            style={{
+              backgroundImage: `
+                linear-gradient(var(--landing-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--landing-grid) 1px, transparent 1px)
+              `,
+              backgroundSize: "28px 28px",
+            }}
+          />
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-px"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, var(--landing-accent-2), transparent)",
+              opacity: 0.7,
+            }}
+          />
 
-          {/* Legend */}
-          <div className="mt-4 flex flex-wrap justify-center gap-4">
-            {legendItems.map((item) => (
-              <div key={item.type} className="flex items-center gap-1.5">
+          <div className="relative">
+            <div className="mb-6 flex flex-wrap justify-center gap-2">
+              {[
+                "linked artifacts",
+                "decisions extracted",
+                "handoff context ready",
+              ].map((label) => (
                 <span
-                  className="h-3 w-3 rounded-sm border"
+                  key={label}
+                  className="rounded-full border px-3 py-1 text-xs uppercase tracking-[0.22em]"
                   style={{
-                    background: nodeColors[item.type],
-                    borderColor: nodeBorder[item.type],
+                    borderColor: "var(--landing-border)",
+                    background:
+                      "color-mix(in srgb, var(--landing-card) 84%, transparent)",
+                    color: "var(--landing-text-3)",
                   }}
-                />
-                <span
-                  className="text-xs"
-                  style={{ color: "var(--landing-text-2)" }}
                 >
-                  {item.label}
+                  {label}
                 </span>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            <svg
+              viewBox="0 0 520 320"
+              className="w-full"
+              style={{ maxHeight: 340 }}
+            >
+              <title>Knowledge graph relationships demo</title>
+              {edges.map((edge) => {
+                const from = getNodeById(edge.from);
+                const to = getNodeById(edge.to);
+
+                if (!from || !to) {
+                  return null;
+                }
+
+                return (
+                  <line
+                    key={`${edge.from}-${edge.to}`}
+                    x1={from.x + 44}
+                    y1={from.y + 18}
+                    x2={to.x + 44}
+                    y2={to.y + 18}
+                    stroke="var(--landing-grid-strong)"
+                    strokeWidth={1.8}
+                  />
+                );
+              })}
+
+              {graphNodes.map((node) => (
+                <g key={node.id}>
+                  <rect
+                    x={node.x}
+                    y={node.y}
+                    width={88}
+                    height={36}
+                    rx={10}
+                    fill={nodeColors[node.type] ?? "var(--landing-card)"}
+                    stroke={nodeBorder[node.type] ?? "var(--landing-border)"}
+                    strokeWidth={1.6}
+                  />
+                  <text
+                    x={node.x + 44}
+                    y={node.y + 22}
+                    textAnchor="middle"
+                    fontSize={9.5}
+                    fill="currentColor"
+                    style={{ color: "var(--landing-text-1)" }}
+                  >
+                    {node.label}
+                  </text>
+                </g>
+              ))}
+            </svg>
+
+            <div className="mt-5 flex flex-wrap justify-center gap-4">
+              {legendItems.map((item) => (
+                <div key={item.type} className="flex items-center gap-2">
+                  <span
+                    className="h-3.5 w-3.5 rounded-sm border"
+                    style={{
+                      background: nodeColors[item.type],
+                      borderColor: nodeBorder[item.type],
+                    }}
+                  />
+                  <span
+                    className="text-xs uppercase tracking-[0.22em]"
+                    style={{ color: "var(--landing-text-3)" }}
+                  >
+                    {item.label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

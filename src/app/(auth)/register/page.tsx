@@ -1,11 +1,19 @@
 "use client";
-import { useState } from "react";
-import { useForm, type Resolver } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { signIn } from "next-auth/react";
+
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  LockKeyhole,
+  Mail,
+  UserRound,
+} from "lucide-react";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+import { type FieldErrors, type Resolver, useForm } from "react-hook-form";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +38,44 @@ const registerSchema = z
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
+const registerResolver: Resolver<RegisterForm> = async (values) => {
+  const parsed = registerSchema.safeParse(values);
+
+  if (parsed.success) {
+    return {
+      values: parsed.data,
+      errors: {},
+    };
+  }
+
+  const flattened = parsed.error.flatten().fieldErrors;
+  const errors: FieldErrors<RegisterForm> = {};
+
+  if (flattened.name?.[0]) {
+    errors.name = { type: "manual", message: flattened.name[0] };
+  }
+
+  if (flattened.email?.[0]) {
+    errors.email = { type: "manual", message: flattened.email[0] };
+  }
+
+  if (flattened.password?.[0]) {
+    errors.password = { type: "manual", message: flattened.password[0] };
+  }
+
+  if (flattened.confirmPassword?.[0]) {
+    errors.confirmPassword = {
+      type: "manual",
+      message: flattened.confirmPassword[0],
+    };
+  }
+
+  return {
+    values: {},
+    errors,
+  };
+};
+
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -39,15 +85,13 @@ export default function RegisterPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RegisterForm>({
-    resolver: zodResolver(
-      registerSchema as unknown as Parameters<typeof zodResolver>[0],
-    ) as unknown as Resolver<RegisterForm>,
+    resolver: registerResolver,
   });
 
   const onSubmit = async (data: RegisterForm) => {
     setServerError(null);
 
-    const res = await fetch("/api/register", {
+    const response = await fetch("/api/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -57,8 +101,8 @@ export default function RegisterPage() {
       }),
     });
 
-    if (!res.ok) {
-      const body = (await res.json()) as { error?: string };
+    if (!response.ok) {
+      const body = (await response.json()) as { error?: string };
       setServerError(body.error ?? "Registration failed");
       return;
     }
@@ -73,104 +117,183 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="w-full max-w-sm">
+    <div
+      className="overflow-hidden rounded-[32px] border p-6 sm:p-8"
+      style={{
+        borderColor: "var(--landing-border)",
+        background:
+          "linear-gradient(180deg, color-mix(in srgb, var(--landing-card-strong) 94%, transparent), color-mix(in srgb, var(--landing-surface) 92%, transparent))",
+        boxShadow: "0 34px 90px -54px var(--landing-shadow)",
+      }}
+    >
       <div className="mb-8">
+        <div
+          className="mb-4 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[0.68rem] uppercase tracking-[0.28em]"
+          style={{
+            borderColor: "var(--landing-border)",
+            background:
+              "color-mix(in srgb, var(--landing-surface) 88%, transparent)",
+            color: "var(--landing-text-2)",
+          }}
+        >
+          <span className="h-2 w-2 rounded-full bg-[color:var(--landing-accent-2)]" />
+          Create your workspace
+        </div>
         <h1
-          className="mb-2 text-2xl font-semibold"
+          className="text-3xl font-semibold tracking-[-0.04em]"
           style={{ color: "var(--landing-text-1)" }}
         >
           Create your account
         </h1>
-        <p className="text-sm" style={{ color: "var(--landing-text-2)" }}>
-          Start orchestrating your agents
+        <p
+          className="mt-3 text-sm leading-6"
+          style={{ color: "var(--landing-text-2)" }}
+        >
+          Start orchestrating your agents with a workspace that already speaks
+          the same language as the rest of the system.
         </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="name">Name</Label>
-          <Input
-            id="name"
-            placeholder="Your name"
-            autoComplete="name"
-            {...register("name")}
-            aria-invalid={!!errors.name}
-          />
-          {errors.name && (
-            <p className="text-xs text-red-500">{errors.name.message}</p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="you@example.com"
-            autoComplete="email"
-            {...register("email")}
-            aria-invalid={!!errors.email}
-          />
-          {errors.email && (
-            <p className="text-xs text-red-500">{errors.email.message}</p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="password">Password</Label>
+        <div className="flex flex-col gap-2">
+          <Label
+            htmlFor="name"
+            className="text-xs uppercase tracking-[0.22em]"
+            style={{ color: "var(--landing-text-3)" }}
+          >
+            Name
+          </Label>
           <div className="relative">
-            <Input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="Min 8 chars, 1 number"
-              autoComplete="new-password"
-              className="pr-10"
-              {...register("password")}
-              aria-invalid={!!errors.password}
-            />
-            <button
-              type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2"
+            <UserRound
+              className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2"
               style={{ color: "var(--landing-text-3)" }}
-              onClick={() => setShowPassword((v) => !v)}
-              tabIndex={-1}
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
-            </button>
+            />
+            <Input
+              id="name"
+              placeholder="Your name"
+              autoComplete="name"
+              className="h-12 rounded-2xl border-[var(--landing-border)] bg-[color:var(--landing-surface)] pl-11 text-[color:var(--landing-text-1)] placeholder:text-[color:var(--landing-text-3)] focus-visible:border-[var(--landing-border-hover)] focus-visible:ring-[color:var(--landing-accent-soft)]"
+              {...register("name")}
+              aria-invalid={!!errors.name}
+            />
           </div>
-          {errors.password && (
-            <p className="text-xs text-red-500">{errors.password.message}</p>
-          )}
+          {errors.name ? (
+            <p className="text-xs text-red-500">{errors.name.message}</p>
+          ) : null}
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="confirmPassword">Confirm password</Label>
-          <Input
-            id="confirmPassword"
-            type={showPassword ? "text" : "password"}
-            placeholder="Repeat your password"
-            autoComplete="new-password"
-            {...register("confirmPassword")}
-            aria-invalid={!!errors.confirmPassword}
-          />
-          {errors.confirmPassword && (
-            <p className="text-xs text-red-500">
-              {errors.confirmPassword.message}
-            </p>
-          )}
+        <div className="flex flex-col gap-2">
+          <Label
+            htmlFor="email"
+            className="text-xs uppercase tracking-[0.22em]"
+            style={{ color: "var(--landing-text-3)" }}
+          >
+            Email
+          </Label>
+          <div className="relative">
+            <Mail
+              className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2"
+              style={{ color: "var(--landing-text-3)" }}
+            />
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              autoComplete="email"
+              className="h-12 rounded-2xl border-[var(--landing-border)] bg-[color:var(--landing-surface)] pl-11 text-[color:var(--landing-text-1)] placeholder:text-[color:var(--landing-text-3)] focus-visible:border-[var(--landing-border-hover)] focus-visible:ring-[color:var(--landing-accent-soft)]"
+              {...register("email")}
+              aria-invalid={!!errors.email}
+            />
+          </div>
+          {errors.email ? (
+            <p className="text-xs text-red-500">{errors.email.message}</p>
+          ) : null}
         </div>
 
-        {serverError && (
-          <p className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-500">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="password"
+              className="text-xs uppercase tracking-[0.22em]"
+              style={{ color: "var(--landing-text-3)" }}
+            >
+              Password
+            </Label>
+            <div className="relative">
+              <LockKeyhole
+                className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2"
+                style={{ color: "var(--landing-text-3)" }}
+              />
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Min 8 chars"
+                autoComplete="new-password"
+                className="h-12 rounded-2xl border-[var(--landing-border)] bg-[color:var(--landing-surface)] pl-11 pr-11 text-[color:var(--landing-text-1)] placeholder:text-[color:var(--landing-text-3)] focus-visible:border-[var(--landing-border-hover)] focus-visible:ring-[color:var(--landing-accent-soft)]"
+                {...register("password")}
+                aria-invalid={!!errors.password}
+              />
+              <button
+                type="button"
+                className="absolute right-4 top-1/2 -translate-y-1/2"
+                style={{ color: "var(--landing-text-3)" }}
+                onClick={() => setShowPassword((value) => !value)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+            {errors.password ? (
+              <p className="text-xs text-red-500">{errors.password.message}</p>
+            ) : null}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="confirmPassword"
+              className="text-xs uppercase tracking-[0.22em]"
+              style={{ color: "var(--landing-text-3)" }}
+            >
+              Confirm password
+            </Label>
+            <div className="relative">
+              <LockKeyhole
+                className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2"
+                style={{ color: "var(--landing-text-3)" }}
+              />
+              <Input
+                id="confirmPassword"
+                type={showPassword ? "text" : "password"}
+                placeholder="Repeat password"
+                autoComplete="new-password"
+                className="h-12 rounded-2xl border-[var(--landing-border)] bg-[color:var(--landing-surface)] pl-11 text-[color:var(--landing-text-1)] placeholder:text-[color:var(--landing-text-3)] focus-visible:border-[var(--landing-border-hover)] focus-visible:ring-[color:var(--landing-accent-soft)]"
+                {...register("confirmPassword")}
+                aria-invalid={!!errors.confirmPassword}
+              />
+            </div>
+            {errors.confirmPassword ? (
+              <p className="text-xs text-red-500">
+                {errors.confirmPassword.message}
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        {serverError ? (
+          <p className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
             {serverError}
           </p>
-        )}
+        ) : null}
 
-        <Button type="submit" className="mt-2 w-full" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          className="mt-2 h-12 rounded-2xl border border-[var(--landing-border-hover)] bg-[color:var(--landing-text-1)] text-[color:var(--landing-bg)] hover:bg-[color:var(--landing-text-1)]/95"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : null}
@@ -186,6 +309,7 @@ export default function RegisterPage() {
         <Link
           href="/login"
           className="font-medium underline underline-offset-4"
+          style={{ color: "var(--landing-text-1)" }}
         >
           Sign in
         </Link>

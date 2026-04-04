@@ -1,11 +1,11 @@
-import { Navbar } from "./_components/Navbar";
-import { Hero } from "./_components/Hero";
-import { LogoBar } from "./_components/LogoBar";
 import { FeaturesScroll } from "./_components/FeaturesScroll";
-import { HowItWorks } from "./_components/HowItWorks";
-import { GraphDemo } from "./_components/GraphDemo";
-import { Testimonials } from "./_components/Testimonials";
 import { Footer } from "./_components/Footer";
+import { GraphDemo } from "./_components/GraphDemo";
+import { Hero } from "./_components/Hero";
+import { HowItWorks } from "./_components/HowItWorks";
+import { LogoBar } from "./_components/LogoBar";
+import { Navbar } from "./_components/Navbar";
+import { Testimonials } from "./_components/Testimonials";
 
 export default function LandingPage() {
   return (
@@ -15,8 +15,39 @@ export default function LandingPage() {
         color: "var(--landing-text-1)",
       }}
     >
-      <Navbar />
-      <Hero />
+      <section
+        className="relative overflow-hidden"
+        style={{ background: "var(--landing-bg)" }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0 opacity-70"
+          style={{
+            backgroundImage: `
+              linear-gradient(var(--landing-grid) 1px, transparent 1px),
+              linear-gradient(90deg, var(--landing-grid) 1px, transparent 1px)
+            `,
+            backgroundSize: "64px 64px",
+          }}
+        />
+        <div
+          className="pointer-events-none absolute left-0 top-0 h-[42rem] w-[42rem]"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in srgb, var(--landing-glow) 34%, transparent), transparent 68%)",
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-48"
+          style={{
+            background:
+              "linear-gradient(180deg, color-mix(in srgb, var(--landing-surface) 54%, transparent), transparent)",
+          }}
+        />
+        <div className="relative z-10">
+          <Navbar />
+          <Hero />
+        </div>
+      </section>
       <LogoBar />
       <FeaturesScroll />
       <HowItWorks />

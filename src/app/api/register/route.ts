@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
+import { eq } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
-import { z } from "zod";
 
 const registerSchema = z.object({
   name: z.string().min(2).max(60),
