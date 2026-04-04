@@ -1,6 +1,6 @@
+import { hash } from "bcryptjs";
 import { db } from "./index";
 import { users } from "./schema";
-import { hash } from "bcryptjs";
 
 async function seed() {
   const passwordHash = await hash("nexus123456", 12);

@@ -1,9 +1,8 @@
 "use client";
-// Needed for next-themes interaction and localized dropdown labels.
+// Needed for client-side locale switching with next-intl navigation.
 
-import { Monitor, Moon, Sun } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
+import { Check, Languages } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,15 +11,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { usePathname, useRouter } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
-type ThemeToggleProps = {
+type LocaleSwitcherProps = {
   className?: string;
 };
 
-export function ThemeToggle({ className }: ThemeToggleProps) {
-  const { setTheme } = useTheme();
-  const t = useTranslations("ThemeToggle");
+export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
+  const t = useTranslations("LocaleSwitcher");
+  const locale = useLocale();
+  const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <DropdownMenu>
@@ -34,23 +37,23 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
             className,
           )}
         >
-          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <Languages className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
         className="border-[var(--landing-border)] bg-[color:var(--landing-surface-strong)] text-[color:var(--landing-text-1)] backdrop-blur-xl"
       >
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          <Sun className="mr-2 h-4 w-4" /> {t("light")}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          <Moon className="mr-2 h-4 w-4" /> {t("dark")}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          <Monitor className="mr-2 h-4 w-4" /> {t("system")}
-        </DropdownMenuItem>
+        {routing.locales.map((nextLocale) => (
+          <DropdownMenuItem
+            key={nextLocale}
+            onClick={() => router.replace(pathname, { locale: nextLocale })}
+            className="flex items-center justify-between gap-3"
+          >
+            <span>{t(`localeNames.${nextLocale}`)}</span>
+            {locale === nextLocale ? <Check className="h-4 w-4" /> : null}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

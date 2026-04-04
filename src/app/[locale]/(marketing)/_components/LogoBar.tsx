@@ -1,3 +1,5 @@
+import { getTranslations } from "next-intl/server";
+
 const agents = [
   "claude code",
   "gemini cli",
@@ -6,7 +8,9 @@ const agents = [
   "gh copilot",
 ] as const;
 
-export function LogoBar() {
+export async function LogoBar() {
+  const t = await getTranslations("Landing.LogoBar");
+
   return (
     <section
       className="relative px-4 py-6 sm:px-6"
@@ -22,7 +26,7 @@ export function LogoBar() {
           className="shrink-0 text-xs font-medium uppercase tracking-[0.34em]"
           style={{ color: "var(--landing-text-3)" }}
         >
-          Works with
+          {t("eyebrow")}
         </span>
 
         <div className="flex flex-1 flex-wrap gap-2">

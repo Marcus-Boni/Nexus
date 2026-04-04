@@ -1,4 +1,8 @@
+"use client";
+// Needed for localized brand subtitle text.
+
 import { Orbit } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
@@ -49,13 +53,16 @@ export function BrandMark({ className, iconClassName }: BrandMarkProps) {
 
 export function BrandLockup({
   className,
-  subtitle = "Where agents think together",
+  subtitle,
   subtitleClassName,
   titleClassName,
   markClassName,
   iconClassName,
   compact = false,
 }: BrandLockupProps) {
+  const t = useTranslations("Brand");
+  const resolvedSubtitle = subtitle ?? t("subtitle");
+
   return (
     <div className={cn("flex items-center gap-3", className)}>
       <BrandMark className={markClassName} iconClassName={iconClassName} />
@@ -78,7 +85,7 @@ export function BrandLockup({
             )}
             style={{ color: "var(--landing-text-3)" }}
           >
-            {subtitle}
+            {resolvedSubtitle}
           </span>
         ) : null}
       </div>

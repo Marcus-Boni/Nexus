@@ -8,8 +8,8 @@ import {
   Mail,
   UserRound,
 } from "lucide-react";
-import Link from "next/link";
 import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { type FieldErrors, type Resolver, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,75 +17,103 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Link, useRouter } from "@/i18n/navigation";
 
-const registerSchema = z
-  .object({
-    name: z
-      .string()
-      .min(2, { error: "Name must be at least 2 characters" })
-      .max(60),
-    email: z.string().email({ error: "Enter a valid email" }),
-    password: z
-      .string()
-      .min(8, { error: "Password must be at least 8 characters" })
-      .regex(/[0-9]/, { error: "Password must contain at least one number" }),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    error: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-type RegisterForm = z.infer<typeof registerSchema>;
-
-const registerResolver: Resolver<RegisterForm> = async (values) => {
-  const parsed = registerSchema.safeParse(values);
-
-  if (parsed.success) {
-    return {
-      values: parsed.data,
-      errors: {},
-    };
-  }
-
-  const flattened = parsed.error.flatten().fieldErrors;
-  const errors: FieldErrors<RegisterForm> = {};
-
-  if (flattened.name?.[0]) {
-    errors.name = { type: "manual", message: flattened.name[0] };
-  }
-
-  if (flattened.email?.[0]) {
-    errors.email = { type: "manual", message: flattened.email[0] };
-  }
-
-  if (flattened.password?.[0]) {
-    errors.password = { type: "manual", message: flattened.password[0] };
-  }
-
-  if (flattened.confirmPassword?.[0]) {
-    errors.confirmPassword = {
-      type: "manual",
-      message: flattened.confirmPassword[0],
-    };
-  }
-
-  return {
-    values: {},
-    errors,
-  };
+type RegisterForm = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
 };
 
+type RegisterApiResponse = {
+  errorCode?:
+    | "INVALID_INPUT"
+    | "EMAIL_ALREADY_REGISTERED"
+    | "USER_CREATION_FAILED";
+};
+
+function createRegisterResolver(messages: {
+  name: string;
+  email: string;
+  passwordLength: string;
+  passwordNumber: string;
+  passwordMismatch: string;
+}): Resolver<RegisterForm> {
+  return async (values) => {
+    const registerSchema = z
+      .object({
+        name: z.string().min(2, { error: messages.name }).max(60),
+        email: z.string().email({ error: messages.email }),
+        password: z
+          .string()
+          .min(8, { error: messages.passwordLength })
+          .regex(/[0-9]/, { error: messages.passwordNumber }),
+        confirmPassword: z.string(),
+      })
+      .refine((data) => data.password === data.confirmPassword, {
+        error: messages.passwordMismatch,
+        path: ["confirmPassword"],
+      });
+
+    const parsed = registerSchema.safeParse(values);
+
+    if (parsed.success) {
+      return {
+        values: parsed.data,
+        errors: {},
+      };
+    }
+
+    const flattened = parsed.error.flatten().fieldErrors;
+    const errors: FieldErrors<RegisterForm> = {};
+
+    if (flattened.name?.[0]) {
+      errors.name = { type: "manual", message: flattened.name[0] };
+    }
+
+    if (flattened.email?.[0]) {
+      errors.email = { type: "manual", message: flattened.email[0] };
+    }
+
+    if (flattened.password?.[0]) {
+      errors.password = { type: "manual", message: flattened.password[0] };
+    }
+
+    if (flattened.confirmPassword?.[0]) {
+      errors.confirmPassword = {
+        type: "manual",
+        message: flattened.confirmPassword[0],
+      };
+    }
+
+    return {
+      values: {},
+      errors,
+    };
+  };
+}
+
 export default function RegisterPage() {
+  const t = useTranslations("Auth.Register");
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+
+  const resolver = createRegisterResolver({
+    name: t("validation.name"),
+    email: t("validation.email"),
+    passwordLength: t("validation.passwordLength"),
+    passwordNumber: t("validation.passwordNumber"),
+    passwordMismatch: t("validation.passwordMismatch"),
+  });
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RegisterForm>({
-    resolver: registerResolver,
+    resolver,
   });
 
   const onSubmit = async (data: RegisterForm) => {
@@ -102,8 +130,19 @@ export default function RegisterPage() {
     });
 
     if (!response.ok) {
-      const body = (await response.json()) as { error?: string };
-      setServerError(body.error ?? "Registration failed");
+      const body = (await response.json()) as RegisterApiResponse;
+
+      const errorMessageMap = {
+        INVALID_INPUT: t("serverErrors.invalidInput"),
+        EMAIL_ALREADY_REGISTERED: t("serverErrors.emailAlreadyRegistered"),
+        USER_CREATION_FAILED: t("serverErrors.userCreationFailed"),
+      } as const;
+
+      setServerError(
+        body.errorCode
+          ? errorMessageMap[body.errorCode]
+          : t("serverErrors.generic"),
+      );
       return;
     }
 
@@ -113,7 +152,7 @@ export default function RegisterPage() {
       redirect: false,
     });
 
-    window.location.href = "/dashboard";
+    router.replace("/dashboard");
   };
 
   return (
@@ -137,20 +176,19 @@ export default function RegisterPage() {
           }}
         >
           <span className="h-2 w-2 rounded-full bg-[color:var(--landing-accent-2)]" />
-          Create your workspace
+          {t("badge")}
         </div>
         <h1
           className="text-3xl font-semibold tracking-[-0.04em]"
           style={{ color: "var(--landing-text-1)" }}
         >
-          Create your account
+          {t("title")}
         </h1>
         <p
           className="mt-3 text-sm leading-6"
           style={{ color: "var(--landing-text-2)" }}
         >
-          Start orchestrating your agents with a workspace that already speaks
-          the same language as the rest of the system.
+          {t("description")}
         </p>
       </div>
 
@@ -161,7 +199,7 @@ export default function RegisterPage() {
             className="text-xs uppercase tracking-[0.22em]"
             style={{ color: "var(--landing-text-3)" }}
           >
-            Name
+            {t("name")}
           </Label>
           <div className="relative">
             <UserRound
@@ -170,7 +208,7 @@ export default function RegisterPage() {
             />
             <Input
               id="name"
-              placeholder="Your name"
+              placeholder={t("namePlaceholder")}
               autoComplete="name"
               className="h-12 rounded-2xl border-[var(--landing-border)] bg-[color:var(--landing-surface)] pl-11 text-[color:var(--landing-text-1)] placeholder:text-[color:var(--landing-text-3)] focus-visible:border-[var(--landing-border-hover)] focus-visible:ring-[color:var(--landing-accent-soft)]"
               {...register("name")}
@@ -188,7 +226,7 @@ export default function RegisterPage() {
             className="text-xs uppercase tracking-[0.22em]"
             style={{ color: "var(--landing-text-3)" }}
           >
-            Email
+            {t("email")}
           </Label>
           <div className="relative">
             <Mail
@@ -198,7 +236,7 @@ export default function RegisterPage() {
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t("emailPlaceholder")}
               autoComplete="email"
               className="h-12 rounded-2xl border-[var(--landing-border)] bg-[color:var(--landing-surface)] pl-11 text-[color:var(--landing-text-1)] placeholder:text-[color:var(--landing-text-3)] focus-visible:border-[var(--landing-border-hover)] focus-visible:ring-[color:var(--landing-accent-soft)]"
               {...register("email")}
@@ -217,7 +255,7 @@ export default function RegisterPage() {
               className="text-xs uppercase tracking-[0.22em]"
               style={{ color: "var(--landing-text-3)" }}
             >
-              Password
+              {t("password")}
             </Label>
             <div className="relative">
               <LockKeyhole
@@ -227,7 +265,7 @@ export default function RegisterPage() {
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Min 8 chars"
+                placeholder={t("passwordPlaceholder")}
                 autoComplete="new-password"
                 className="h-12 rounded-2xl border-[var(--landing-border)] bg-[color:var(--landing-surface)] pl-11 pr-11 text-[color:var(--landing-text-1)] placeholder:text-[color:var(--landing-text-3)] focus-visible:border-[var(--landing-border-hover)] focus-visible:ring-[color:var(--landing-accent-soft)]"
                 {...register("password")}
@@ -238,7 +276,9 @@ export default function RegisterPage() {
                 className="absolute right-4 top-1/2 -translate-y-1/2"
                 style={{ color: "var(--landing-text-3)" }}
                 onClick={() => setShowPassword((value) => !value)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-label={
+                  showPassword ? t("hidePassword") : t("showPassword")
+                }
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" />
@@ -258,7 +298,7 @@ export default function RegisterPage() {
               className="text-xs uppercase tracking-[0.22em]"
               style={{ color: "var(--landing-text-3)" }}
             >
-              Confirm password
+              {t("confirmPassword")}
             </Label>
             <div className="relative">
               <LockKeyhole
@@ -268,7 +308,7 @@ export default function RegisterPage() {
               <Input
                 id="confirmPassword"
                 type={showPassword ? "text" : "password"}
-                placeholder="Repeat password"
+                placeholder={t("confirmPasswordPlaceholder")}
                 autoComplete="new-password"
                 className="h-12 rounded-2xl border-[var(--landing-border)] bg-[color:var(--landing-surface)] pl-11 text-[color:var(--landing-text-1)] placeholder:text-[color:var(--landing-text-3)] focus-visible:border-[var(--landing-border-hover)] focus-visible:ring-[color:var(--landing-accent-soft)]"
                 {...register("confirmPassword")}
@@ -297,7 +337,7 @@ export default function RegisterPage() {
           {isSubmitting ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : null}
-          Create account
+          {t("submit")}
         </Button>
       </form>
 
@@ -305,13 +345,13 @@ export default function RegisterPage() {
         className="mt-6 text-center text-sm"
         style={{ color: "var(--landing-text-2)" }}
       >
-        Already have an account?{" "}
+        {t("loginPrompt")}{" "}
         <Link
           href="/login"
           className="font-medium underline underline-offset-4"
           style={{ color: "var(--landing-text-1)" }}
         >
-          Sign in
+          {t("loginCta")}
         </Link>
       </p>
     </div>

@@ -1,10 +1,11 @@
+import { compare } from "bcryptjs";
+import { eq } from "drizzle-orm";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { compare } from "bcryptjs";
+import { z } from "zod";
+
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
-import { z } from "zod";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -39,7 +40,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email: user.email,
           name: user.name ?? null,
           role: user.role,
-        } as { id: string; email: string; name: string | null; role: string };
+        };
       },
     }),
   ],
@@ -52,14 +53,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as { role?: "admin" | "member" }).role ?? "member";
+        token.role = user.role;
       }
+
       return token;
     },
     session({ session, token }) {
-      session.user.id = token.id as string;
-      (session.user as unknown as { role: "admin" | "member" }).role =
-        (token.role as "admin" | "member" | undefined) ?? "member";
+      const tokenId = typeof token.id === "string" ? token.id : "";
+      const tokenRole =
+        token.role === "admin" || token.role === "member"
+          ? token.role
+          : "member";
+
+      if (session.user) {
+        session.user.id = tokenId;
+        session.user.role = tokenRole;
+      }
+
       return session;
     },
   },

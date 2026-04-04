@@ -1,5 +1,5 @@
 "use client";
-// Needed for pointer-driven background effects and reveal animations.
+// Needed for pointer-driven background effects, localized copy and reveal animations.
 
 import { ArrowRight } from "lucide-react";
 import {
@@ -10,11 +10,13 @@ import {
   useSpring,
 } from "motion/react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
+import NextLink from "next/link";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import type { PointerEvent } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 
 const TerminalCanvas = dynamic(
   () => import("./TerminalCanvas").then((module) => module.TerminalCanvas),
@@ -46,21 +48,10 @@ const terminalPalettes = {
   },
 } as const;
 
-const proofPoints = [
-  "Shared context between agents",
-  "Native terminal orchestration",
-  "Readable project memory",
-] as const;
-
-const compactStats = [
-  { label: "Agents online", value: "05" },
-  { label: "Context links", value: "128" },
-  { label: "Handoff delay", value: "0s" },
-] as const;
-
 export function Hero() {
   const shouldReduceMotion = Boolean(useReducedMotion());
   const { resolvedTheme } = useTheme();
+  const t = useTranslations("Landing.Hero");
   const pointerX = useMotionValue(50);
   const pointerY = useMotionValue(34);
   const smoothX = useSpring(pointerX, {
@@ -75,6 +66,33 @@ export function Hero() {
   });
   const terminalPalette =
     resolvedTheme === "light" ? terminalPalettes.light : terminalPalettes.dark;
+
+  const proofPoints = [t("proofPoint1"), t("proofPoint2"), t("proofPoint3")];
+  const compactStats = [
+    {
+      label: t("stats.agentsOnline.label"),
+      value: t("stats.agentsOnline.value"),
+    },
+    {
+      label: t("stats.contextLinks.label"),
+      value: t("stats.contextLinks.value"),
+    },
+    {
+      label: t("stats.handoffDelay.label"),
+      value: t("stats.handoffDelay.value"),
+    },
+  ];
+  const terminalCopy = {
+    header: t("terminal.header"),
+    lines: [
+      t("terminal.line1"),
+      t("terminal.line2"),
+      t("terminal.line3"),
+      t("terminal.line4"),
+      t("terminal.line5"),
+    ],
+    badges: ["claude-code", "gemini-cli", "codex-cli"],
+  };
 
   const spotlight = useMotionTemplate`
     radial-gradient(26rem 26rem at ${smoothX}% ${smoothY}%,
@@ -142,7 +160,7 @@ export function Hero() {
                     : "pulse-dot 2s ease-in-out infinite",
                 }}
               />
-              Local-first multi-agent workspace
+              {t("badge")}
             </div>
 
             <h1
@@ -153,16 +171,14 @@ export function Hero() {
                 color: "var(--landing-text-1)",
               }}
             >
-              Make agent handoffs feel structured, fast, and easy to trust.
+              {t("title")}
             </h1>
 
             <p
               className="mt-5 max-w-xl text-pretty text-[1rem] leading-7 sm:text-[1.06rem]"
               style={{ color: "var(--landing-text-2)" }}
             >
-              Nexus keeps terminals native, captures the context that matters,
-              and turns scattered agent work into one coherent operating layer
-              for your project.
+              {t("description")}
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -172,7 +188,7 @@ export function Hero() {
                 asChild
               >
                 <Link href="/register">
-                  Get started free
+                  {t("primaryCta")}
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
@@ -182,7 +198,7 @@ export function Hero() {
                 className="rounded-full border border-[var(--landing-border)] bg-[color:var(--landing-surface)] px-6 text-[color:var(--landing-text-1)] hover:-translate-y-0.5 hover:border-[var(--landing-border-hover)] hover:bg-[color:var(--landing-card-strong)]"
                 asChild
               >
-                <Link href="#how-it-works">See how it works</Link>
+                <NextLink href="#how-it-works">{t("secondaryCta")}</NextLink>
               </Button>
             </div>
 
@@ -261,18 +277,17 @@ export function Hero() {
                       className="text-[0.68rem] uppercase tracking-[0.28em]"
                       style={{ color: "var(--landing-text-3)" }}
                     >
-                      Live session preview
+                      {t("preview.eyebrow")}
                     </p>
                     <p
                       className="mt-1 text-sm font-medium"
                       style={{ color: "var(--landing-text-1)" }}
                     >
-                      Claude, Gemini and Codex aligned on the same context
-                      layer.
+                      {t("preview.title")}
                     </p>
                   </div>
                   <div className="hidden items-center gap-2 sm:flex">
-                    {["claude-code", "gemini-cli", "codex-cli"].map((agent) => (
+                    {terminalCopy.badges.map((agent) => (
                       <span
                         key={agent}
                         className="rounded-full border px-3 py-1 font-mono text-[0.68rem]"
@@ -302,6 +317,7 @@ export function Hero() {
                 <TerminalCanvas
                   palette={terminalPalette}
                   reduceMotion={shouldReduceMotion}
+                  copy={terminalCopy}
                 />
               </div>
             </div>

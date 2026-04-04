@@ -6,7 +6,6 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().startsWith("sk-ant-").optional(),
   DATABASE_URL: z.string(),
   DATABASE_AUTH_TOKEN: z.string().optional(),
-  WS_SERVER_PORT: z.coerce.number().default(3001),
   NODE_ENV: z
     .enum(["development", "production", "test"])
     .default("development"),

@@ -1,34 +1,37 @@
 "use client";
-// Needed for the section reveal animation.
+
+// Needed for localized content and section reveal animation.
 
 import { motion, useReducedMotion } from "motion/react";
+import { useTranslations } from "next-intl";
 
-const testimonials = [
-  {
-    quote:
-      "We cut our AI handoff time from twenty minutes to zero. Nexus made the workspace feel coordinated instead of chaotic.",
-    name: "Sarah Chen",
-    role: "Staff Engineer, Vercel",
-    initials: "SC",
-  },
-  {
-    quote:
-      "For the first time, my Claude and Gemini sessions actually feel like they are participating in the same project instead of competing for context.",
-    name: "Marcus Webb",
-    role: "Lead Developer, Linear",
-    initials: "MW",
-  },
-  {
-    quote:
-      "The graph gives us memory without adding process overhead. That is the rare kind of UX improvement teams notice immediately.",
-    name: "Ana Souza",
-    role: "CTO, Fathom",
-    initials: "AS",
-  },
-] as const;
+const testimonialNames = ["Sarah Chen", "Marcus Webb", "Ana Souza"] as const;
+const testimonialInitials = ["SC", "MW", "AS"] as const;
 
 export function Testimonials() {
   const shouldReduceMotion = useReducedMotion();
+  const t = useTranslations("Landing.Testimonials");
+
+  const testimonials = [
+    {
+      quote: t("testimonial1.quote"),
+      name: testimonialNames[0],
+      role: t("testimonial1.role"),
+      initials: testimonialInitials[0],
+    },
+    {
+      quote: t("testimonial2.quote"),
+      name: testimonialNames[1],
+      role: t("testimonial2.role"),
+      initials: testimonialInitials[1],
+    },
+    {
+      quote: t("testimonial3.quote"),
+      name: testimonialNames[2],
+      role: t("testimonial3.role"),
+      initials: testimonialInitials[2],
+    },
+  ];
 
   return (
     <section
@@ -45,14 +48,13 @@ export function Testimonials() {
             className="mb-4 text-xs font-medium uppercase tracking-[0.34em]"
             style={{ color: "var(--landing-text-3)" }}
           >
-            Team signal
+            {t("eyebrow")}
           </p>
           <h2
             className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl"
             style={{ color: "var(--landing-text-1)" }}
           >
-            Small teams feel faster when the interface keeps everyone in
-            context.
+            {t("title")}
           </h2>
         </div>
 
@@ -86,7 +88,7 @@ export function Testimonials() {
                 className="relative text-sm leading-7 sm:text-[0.95rem]"
                 style={{ color: "var(--landing-text-2)" }}
               >
-                “{testimonial.quote}”
+                "{testimonial.quote}"
               </p>
 
               <div className="relative mt-8 flex items-center gap-3">

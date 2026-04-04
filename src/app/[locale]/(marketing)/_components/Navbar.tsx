@@ -1,24 +1,28 @@
 "use client";
 
-// Needed for the mobile sheet state and client-side navigation affordances.
+// Needed for the mobile sheet state, locale switching and client-side navigation affordances.
 
 import { Menu, Sparkles } from "lucide-react";
-import Link from "next/link";
+import NextLink from "next/link";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { BrandLockup } from "@/components/brand/BrandLockup";
+import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-
-const navLinks = [
-  { href: "#features", label: "Features" },
-  { href: "#how-it-works", label: "How it works" },
-  { href: "#graph-demo", label: "Graph" },
-] as const;
+import { Link } from "@/i18n/navigation";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const t = useTranslations("Landing.Navbar");
+
+  const navLinks = [
+    { href: "#features", label: t("links.features") },
+    { href: "#how-it-works", label: t("links.howItWorks") },
+    { href: "#graph-demo", label: t("links.graph") },
+  ] as const;
 
   return (
     <header className="sticky top-0 z-50 px-4 pt-4 sm:px-6">
@@ -51,6 +55,7 @@ export function Navbar() {
               "radial-gradient(circle at 78% 40%, color-mix(in srgb, var(--landing-accent-soft) 44%, transparent), transparent 72%)",
           }}
         />
+
         <div className="relative z-10 flex items-center gap-3">
           <Link href="/" className="group flex items-center gap-3 font-medium">
             <BrandLockup />
@@ -72,14 +77,14 @@ export function Navbar() {
               className="text-[10px] font-medium uppercase tracking-[0.28em]"
               style={{ color: "var(--landing-text-2)" }}
             >
-              Local-first orchestration
+              {t("promo")}
             </span>
           </div>
         </div>
 
         <nav className="relative z-10 hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
-            <Link
+            <NextLink
               key={link.href}
               href={link.href}
               className="rounded-full px-4 py-2 text-sm transition-[transform,color,background-color] duration-300 hover:-translate-y-0.5"
@@ -91,11 +96,12 @@ export function Navbar() {
               <span className="rounded-full px-1 py-0.5 transition-colors hover:text-[var(--landing-text-1)]">
                 {link.label}
               </span>
-            </Link>
+            </NextLink>
           ))}
         </nav>
 
         <div className="relative z-10 hidden items-center gap-2 md:flex">
+          <LocaleSwitcher />
           <ThemeToggle />
           <Button
             variant="ghost"
@@ -103,25 +109,26 @@ export function Navbar() {
             className="rounded-full border border-transparent bg-transparent text-[color:var(--landing-text-2)] hover:border-[var(--landing-border)] hover:bg-[color:var(--landing-card)] hover:text-[color:var(--landing-text-1)]"
             asChild
           >
-            <Link href="/login">Sign in</Link>
+            <Link href="/login">{t("signIn")}</Link>
           </Button>
           <Button
             size="sm"
             className="rounded-full border border-[var(--landing-border-hover)] bg-[color:var(--landing-text-1)] text-[color:var(--landing-bg)] shadow-[0_18px_40px_-28px_var(--landing-shadow)] hover:-translate-y-0.5 hover:bg-[color:var(--landing-text-1)]/95"
             asChild
           >
-            <Link href="/register">Get started</Link>
+            <Link href="/register">{t("getStarted")}</Link>
           </Button>
         </div>
 
         <div className="relative z-10 flex items-center gap-2 md:hidden">
+          <LocaleSwitcher />
           <ThemeToggle />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Open menu"
+                aria-label={t("openMenu")}
                 className="rounded-full border border-[var(--landing-border)] bg-[color:var(--landing-surface)] text-[color:var(--landing-text-2)] hover:border-[var(--landing-border-hover)] hover:bg-[color:var(--landing-card)] hover:text-[color:var(--landing-text-1)]"
               >
                 <Menu className="h-5 w-5" />
@@ -138,14 +145,14 @@ export function Navbar() {
                   onClick={() => setOpen(false)}
                 >
                   <BrandLockup
-                    subtitle="Local-first agent workspace"
+                    subtitle={t("mobileSubtitle")}
                     subtitleClassName="tracking-[0.24em]"
                   />
                 </Link>
 
                 <nav className="flex flex-col gap-2">
                   {navLinks.map((link) => (
-                    <Link
+                    <NextLink
                       key={link.href}
                       href={link.href}
                       className="rounded-2xl border px-4 py-3 text-sm transition-colors"
@@ -158,7 +165,7 @@ export function Navbar() {
                       onClick={() => setOpen(false)}
                     >
                       {link.label}
-                    </Link>
+                    </NextLink>
                   ))}
                 </nav>
 
@@ -169,7 +176,7 @@ export function Navbar() {
                     asChild
                   >
                     <Link href="/login" onClick={() => setOpen(false)}>
-                      Sign in
+                      {t("signIn")}
                     </Link>
                   </Button>
                   <Button
@@ -177,7 +184,7 @@ export function Navbar() {
                     asChild
                   >
                     <Link href="/register" onClick={() => setOpen(false)}>
-                      Get started
+                      {t("getStarted")}
                     </Link>
                   </Button>
                 </div>

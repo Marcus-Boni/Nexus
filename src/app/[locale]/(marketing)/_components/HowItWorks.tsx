@@ -1,34 +1,34 @@
 "use client";
-// Needed for reveal animations on the process timeline.
+
+// Needed for localized copy and reveal animations on the process timeline.
 
 import { motion, useReducedMotion } from "motion/react";
-
-const steps = [
-  {
-    number: "01",
-    title: "Launch the right agent for the job",
-    description:
-      "Open Claude Code, Gemini CLI, Codex, or another adapter directly inside Nexus. The terminal stays native, so your workflow does too.",
-    tag: "PTY sessions",
-  },
-  {
-    number: "02",
-    title: "Extract decisions while work is happening",
-    description:
-      "Important outputs become connected context nodes automatically. You keep the flow of the terminal while Nexus keeps the project memory.",
-    tag: "Knowledge graph",
-  },
-  {
-    number: "03",
-    title: "Start the next handoff with context already attached",
-    description:
-      "New sessions inherit the decisions, files, and reasoning that matter. Less copy-paste, less restating, more momentum.",
-    tag: "Context injection",
-  },
-] as const;
+import { useTranslations } from "next-intl";
 
 export function HowItWorks() {
   const shouldReduceMotion = useReducedMotion();
+  const t = useTranslations("Landing.HowItWorks");
+
+  const steps = [
+    {
+      number: t("step1.number"),
+      title: t("step1.title"),
+      description: t("step1.description"),
+      tag: t("step1.tag"),
+    },
+    {
+      number: t("step2.number"),
+      title: t("step2.title"),
+      description: t("step2.description"),
+      tag: t("step2.tag"),
+    },
+    {
+      number: t("step3.number"),
+      title: t("step3.title"),
+      description: t("step3.description"),
+      tag: t("step3.tag"),
+    },
+  ];
 
   return (
     <section
@@ -54,21 +54,20 @@ export function HowItWorks() {
               className="mb-4 text-xs font-medium uppercase tracking-[0.34em]"
               style={{ color: "var(--landing-text-3)" }}
             >
-              Workflow
+              {t("eyebrow")}
             </p>
             <h2
               className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl"
               style={{ color: "var(--landing-text-1)" }}
             >
-              The handoff loop is built into the product.
+              {t("title")}
             </h2>
           </div>
           <p
             className="max-w-xl text-base leading-7"
             style={{ color: "var(--landing-text-2)" }}
           >
-            Nexus gives each agent a focused place to work while keeping the
-            shared thread of reasoning visible and reusable.
+            {t("description")}
           </p>
         </div>
 

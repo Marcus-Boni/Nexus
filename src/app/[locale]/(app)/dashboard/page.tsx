@@ -1,16 +1,42 @@
 import { FolderPlus } from "lucide-react";
+import { notFound } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+
 import { Button } from "@/components/ui/button";
+import { isValidLocale } from "@/i18n/messages";
 import { auth } from "@/lib/auth";
 
-const placeholderStats = [
-  { label: "Your Projects", value: "0" },
-  { label: "Active Sessions", value: "0" },
-  { label: "Context Nodes", value: "0" },
-];
+const placeholderValues = ["0", "0", "0"] as const;
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+
+  if (!isValidLocale(locale)) {
+    notFound();
+  }
+
+  setRequestLocale(locale);
+
   const session = await auth();
-  const name = session?.user?.name ?? session?.user?.email ?? "there";
+  const t = await getTranslations("App.Dashboard");
+  const name = session?.user?.name ?? session?.user?.email ?? t("fallbackName");
+
+  const placeholderStats = [
+    { label: t("stats.projects"), value: placeholderValues[0] },
+    { label: t("stats.sessions"), value: placeholderValues[1] },
+    { label: t("stats.nodes"), value: placeholderValues[2] },
+  ];
+
+  const roadmapItems = [
+    t("roadmap.item1"),
+    t("roadmap.item2"),
+    t("roadmap.item3"),
+    t("roadmap.item4"),
+  ];
 
   return (
     <div className="max-w-4xl">
@@ -18,13 +44,12 @@ export default async function DashboardPage() {
         className="mb-2 text-2xl font-semibold"
         style={{ color: "var(--landing-text-1)" }}
       >
-        Welcome back, {name}
+        {t("title", { name })}
       </h1>
       <p className="mb-8 text-sm" style={{ color: "var(--landing-text-2)" }}>
-        Here&apos;s your Nexus overview
+        {t("subtitle")}
       </p>
 
-      {/* Stats */}
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
         {placeholderStats.map((stat) => (
           <div
@@ -51,7 +76,6 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* CTA */}
       <div
         className="rounded-xl border p-6"
         style={{
@@ -63,18 +87,17 @@ export default async function DashboardPage() {
           className="mb-2 font-semibold"
           style={{ color: "var(--landing-text-1)" }}
         >
-          Create your first project
+          {t("cta.title")}
         </h2>
         <p className="mb-4 text-sm" style={{ color: "var(--landing-text-2)" }}>
-          Projects group your agent sessions and knowledge graph. Start here.
+          {t("cta.description")}
         </p>
         <Button disabled>
           <FolderPlus className="mr-2 h-4 w-4" />
-          New project — coming in Phase 1
+          {t("cta.button")}
         </Button>
       </div>
 
-      {/* Phase roadmap */}
       <div
         className="mt-6 rounded-xl border p-6"
         style={{ borderColor: "var(--landing-border)" }}
@@ -83,16 +106,15 @@ export default async function DashboardPage() {
           className="mb-4 font-semibold"
           style={{ color: "var(--landing-text-1)" }}
         >
-          What&apos;s coming
+          {t("roadmap.title")}
         </h2>
         <ul
           className="flex flex-col gap-2 text-sm"
           style={{ color: "var(--landing-text-2)" }}
         >
-          <li>Phase 1 — PTY terminal sessions via WebSocket server</li>
-          <li>Phase 2 — Knowledge graph builder and context extraction</li>
-          <li>Phase 3 — Automatic context injection with Anthropic API</li>
-          <li>Phase 4 — Multi-agent orchestration and conflict resolution</li>
+          {roadmapItems.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
         </ul>
       </div>
     </div>

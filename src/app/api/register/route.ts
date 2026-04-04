@@ -2,6 +2,7 @@ import { hash } from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
 
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Dados inválidos", details: parsed.error.flatten() },
+      { errorCode: "INVALID_INPUT", details: parsed.error.flatten() },
       { status: 400 },
     );
   }
@@ -29,8 +30,12 @@ export async function POST(req: NextRequest) {
     .from(users)
     .where(eq(users.email, email))
     .limit(1);
+
   if (existing[0]) {
-    return NextResponse.json({ error: "Email já cadastrado" }, { status: 409 });
+    return NextResponse.json(
+      { errorCode: "EMAIL_ALREADY_REGISTERED" },
+      { status: 409 },
+    );
   }
 
   const passwordHash = await hash(password, 12);
@@ -47,7 +52,7 @@ export async function POST(req: NextRequest) {
   const user = inserted[0];
   if (!user) {
     return NextResponse.json(
-      { error: "Erro ao criar usuário" },
+      { errorCode: "USER_CREATION_FAILED" },
       { status: 500 },
     );
   }

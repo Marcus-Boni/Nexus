@@ -1,8 +1,8 @@
 "use client";
 
 import { Eye, EyeOff, Loader2, LockKeyhole, Mail } from "lucide-react";
-import Link from "next/link";
 import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { type FieldErrors, type Resolver, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -10,53 +10,67 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Link, useRouter } from "@/i18n/navigation";
 
-const loginSchema = z.object({
-  email: z.string().email({ error: "Enter a valid email" }),
-  password: z
-    .string()
-    .min(8, { error: "Password must be at least 8 characters" }),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
-
-const loginResolver: Resolver<LoginForm> = async (values) => {
-  const parsed = loginSchema.safeParse(values);
-
-  if (parsed.success) {
-    return {
-      values: parsed.data,
-      errors: {},
-    };
-  }
-
-  const flattened = parsed.error.flatten().fieldErrors;
-  const errors: FieldErrors<LoginForm> = {};
-
-  if (flattened.email?.[0]) {
-    errors.email = { type: "manual", message: flattened.email[0] };
-  }
-
-  if (flattened.password?.[0]) {
-    errors.password = { type: "manual", message: flattened.password[0] };
-  }
-
-  return {
-    values: {},
-    errors,
-  };
+type LoginForm = {
+  email: string;
+  password: string;
 };
 
+function createLoginResolver(messages: {
+  email: string;
+  password: string;
+}): Resolver<LoginForm> {
+  return async (values) => {
+    const loginSchema = z.object({
+      email: z.string().email({ error: messages.email }),
+      password: z.string().min(8, { error: messages.password }),
+    });
+
+    const parsed = loginSchema.safeParse(values);
+
+    if (parsed.success) {
+      return {
+        values: parsed.data,
+        errors: {},
+      };
+    }
+
+    const flattened = parsed.error.flatten().fieldErrors;
+    const errors: FieldErrors<LoginForm> = {};
+
+    if (flattened.email?.[0]) {
+      errors.email = { type: "manual", message: flattened.email[0] };
+    }
+
+    if (flattened.password?.[0]) {
+      errors.password = { type: "manual", message: flattened.password[0] };
+    }
+
+    return {
+      values: {},
+      errors,
+    };
+  };
+}
+
 export default function LoginPage() {
+  const t = useTranslations("Auth.Login");
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  const resolver = createLoginResolver({
+    email: t("validation.email"),
+    password: t("validation.password"),
+  });
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginForm>({
-    resolver: loginResolver,
+    resolver,
   });
 
   const onSubmit = async (data: LoginForm) => {
@@ -69,11 +83,11 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-      setAuthError("Invalid email or password");
+      setAuthError(t("invalidCredentials"));
       return;
     }
 
-    window.location.href = "/dashboard";
+    router.replace("/dashboard");
   };
 
   return (
@@ -97,19 +111,19 @@ export default function LoginPage() {
           }}
         >
           <span className="h-2 w-2 rounded-full bg-[color:var(--landing-accent-2)]" />
-          Secure sign in
+          {t("badge")}
         </div>
         <h1
           className="text-3xl font-semibold tracking-[-0.04em]"
           style={{ color: "var(--landing-text-1)" }}
         >
-          Welcome back
+          {t("title")}
         </h1>
         <p
           className="mt-3 text-sm leading-6"
           style={{ color: "var(--landing-text-2)" }}
         >
-          Sign in to continue your shared agent workspace.
+          {t("description")}
         </p>
       </div>
 
@@ -120,7 +134,7 @@ export default function LoginPage() {
             className="text-xs uppercase tracking-[0.22em]"
             style={{ color: "var(--landing-text-3)" }}
           >
-            Email
+            {t("email")}
           </Label>
           <div className="relative">
             <Mail
@@ -130,7 +144,7 @@ export default function LoginPage() {
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t("emailPlaceholder")}
               autoComplete="email"
               className="h-12 rounded-2xl border-[var(--landing-border)] bg-[color:var(--landing-surface)] pl-11 text-[color:var(--landing-text-1)] placeholder:text-[color:var(--landing-text-3)] focus-visible:border-[var(--landing-border-hover)] focus-visible:ring-[color:var(--landing-accent-soft)]"
               {...register("email")}
@@ -148,7 +162,7 @@ export default function LoginPage() {
             className="text-xs uppercase tracking-[0.22em]"
             style={{ color: "var(--landing-text-3)" }}
           >
-            Password
+            {t("password")}
           </Label>
           <div className="relative">
             <LockKeyhole
@@ -158,7 +172,7 @@ export default function LoginPage() {
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="Enter your password"
+              placeholder={t("passwordPlaceholder")}
               autoComplete="current-password"
               className="h-12 rounded-2xl border-[var(--landing-border)] bg-[color:var(--landing-surface)] pl-11 pr-11 text-[color:var(--landing-text-1)] placeholder:text-[color:var(--landing-text-3)] focus-visible:border-[var(--landing-border-hover)] focus-visible:ring-[color:var(--landing-accent-soft)]"
               {...register("password")}
@@ -169,7 +183,7 @@ export default function LoginPage() {
               className="absolute right-4 top-1/2 -translate-y-1/2"
               style={{ color: "var(--landing-text-3)" }}
               onClick={() => setShowPassword((value) => !value)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={showPassword ? t("hidePassword") : t("showPassword")}
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -197,7 +211,7 @@ export default function LoginPage() {
           {isSubmitting ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : null}
-          Sign in
+          {t("submit")}
         </Button>
       </form>
 
@@ -207,19 +221,19 @@ export default function LoginPage() {
       >
         <button
           type="button"
-          className="opacity-50 cursor-not-allowed"
+          className="cursor-not-allowed opacity-50"
           disabled
         >
-          Forgot password?
+          {t("forgotPassword")}
         </button>
         <p>
-          Don&apos;t have an account?{" "}
+          {t("registerPrompt")}{" "}
           <Link
             href="/register"
             className="font-medium underline underline-offset-4"
             style={{ color: "var(--landing-text-1)" }}
           >
-            Register
+            {t("registerCta")}
           </Link>
         </p>
       </div>

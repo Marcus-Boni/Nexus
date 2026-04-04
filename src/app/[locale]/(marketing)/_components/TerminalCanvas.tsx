@@ -1,5 +1,5 @@
 "use client";
-// Needed for WebGL rendering and frame-by-frame pointer interaction.
+// Needed for WebGL rendering and localized frame-by-frame terminal copy.
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
@@ -17,18 +17,17 @@ type TerminalPalette = {
   textSecondary: string;
 };
 
-type TerminalCanvasProps = {
-  palette: TerminalPalette;
-  reduceMotion?: boolean;
+type TerminalCopy = {
+  header: string;
+  lines: string[];
+  badges: string[];
 };
 
-const SCREEN_LINES = [
-  "$ nexus session spawn --agent claude-code",
-  "context.sync(graph): linked 12 related nodes",
-  "handoff(gemini-cli): seeded with schema + notes",
-  "codex-cli: applying patch to workspace layout",
-  "status: all agents aligned on current objective",
-] as const;
+type TerminalCanvasProps = {
+  palette: TerminalPalette;
+  copy: TerminalCopy;
+  reduceMotion?: boolean;
+};
 
 const SCREEN_WIDTH = 768;
 const SCREEN_HEIGHT = 448;
@@ -64,12 +63,13 @@ function drawScreen(
   context: CanvasRenderingContext2D,
   elapsedTime: number,
   palette: TerminalPalette,
+  copy: TerminalCopy,
   reduceMotion: boolean,
 ) {
   const width = context.canvas.width;
   const height = context.canvas.height;
   const headerHeight = 80;
-  const finalLine = SCREEN_LINES.at(-1) ?? "";
+  const finalLine = copy.lines.at(-1) ?? "";
   const progress = reduceMotion ? 1 : (Math.sin(elapsedTime * 0.8) + 1) / 2;
   const visibleCharacters = reduceMotion
     ? finalLine.length
@@ -101,10 +101,9 @@ function drawScreen(
 
   context.fillStyle = palette.textSecondary;
   context.font = "600 18px var(--font-geist-mono), monospace";
-  context.fillText("NEXUS / shared session", 36, 48);
+  context.fillText(copy.header, 36, 48);
 
-  const badges = ["claude-code", "gemini-cli", "codex-cli"];
-  badges.forEach((badge, index) => {
+  copy.badges.forEach((badge, index) => {
     const badgeX = 36 + index * 128;
     roundRect(context, badgeX, 58, 112, 28, 10);
     context.fillStyle = "#0d1730";
@@ -121,15 +120,13 @@ function drawScreen(
   context.fillRect(36, headerHeight + 16, width - 72, 2);
 
   context.font = "500 18px var(--font-geist-mono), monospace";
-  SCREEN_LINES.forEach((line, index) => {
+  copy.lines.forEach((line, index) => {
     const y = headerHeight + 56 + index * 48;
     const renderedLine =
-      index === SCREEN_LINES.length - 1
-        ? line.slice(0, visibleCharacters)
-        : line;
+      index === copy.lines.length - 1 ? line.slice(0, visibleCharacters) : line;
 
     context.fillStyle =
-      index === SCREEN_LINES.length - 1
+      index === copy.lines.length - 1
         ? palette.textPrimary
         : `${palette.textSecondary}dd`;
     context.fillText(renderedLine, 54, y);
@@ -148,7 +145,7 @@ function drawScreen(
     context.fillStyle = palette.accentSecondary;
     context.fillRect(
       54 + visibleCharacters * 10.6,
-      headerHeight + 56 + (SCREEN_LINES.length - 1) * 48 - 16,
+      headerHeight + 56 + (copy.lines.length - 1) * 48 - 16,
       10,
       22,
     );
@@ -165,7 +162,11 @@ function drawScreen(
   }
 }
 
-function TerminalRig({ palette, reduceMotion = false }: TerminalCanvasProps) {
+function TerminalRig({
+  palette,
+  copy,
+  reduceMotion = false,
+}: TerminalCanvasProps) {
   const shellRef = useRef<THREE.Group>(null);
   const particlesRef = useRef<THREE.Points>(null);
   const linesRef = useRef<THREE.LineSegments>(null);
@@ -307,7 +308,7 @@ function TerminalRig({ palette, reduceMotion = false }: TerminalCanvasProps) {
       elapsedTime - lastScreenDrawRef.current >= SCREEN_REFRESH_INTERVAL ||
       lastScreenDrawRef.current < 0
     ) {
-      drawScreen(screen.context, elapsedTime, palette, reduceMotion);
+      drawScreen(screen.context, elapsedTime, palette, copy, reduceMotion);
       screen.texture.needsUpdate = true;
       lastScreenDrawRef.current = elapsedTime;
     }
@@ -415,6 +416,7 @@ function TerminalRig({ palette, reduceMotion = false }: TerminalCanvasProps) {
 
 export function TerminalCanvas({
   palette,
+  copy,
   reduceMotion = false,
 }: TerminalCanvasProps) {
   return (
@@ -440,7 +442,7 @@ export function TerminalCanvas({
         intensity={1.8}
         color={palette.glow}
       />
-      <TerminalRig palette={palette} reduceMotion={reduceMotion} />
+      <TerminalRig palette={palette} copy={copy} reduceMotion={reduceMotion} />
     </Canvas>
   );
 }

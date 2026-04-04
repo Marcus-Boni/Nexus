@@ -2,52 +2,45 @@
 
 import { GitBranchPlus, Orbit, ShieldCheck } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { BrandLockup } from "@/components/brand/BrandLockup";
-
-const quotes = [
-  {
-    text: "Where your agents think together.",
-    author: "Nexus tagline",
-  },
-  {
-    text: "Context is the new code.",
-    author: "Team Nexus",
-  },
-  {
-    text: "One platform. Every agent.",
-    author: "Nexus",
-  },
-] as const;
-
-const authHighlights = [
-  {
-    icon: Orbit,
-    label: "Shared context",
-    description: "Every session starts with the reasoning that already exists.",
-  },
-  {
-    icon: GitBranchPlus,
-    label: "Structured handoffs",
-    description:
-      "Work moves between agents without losing intent or artifacts.",
-  },
-  {
-    icon: ShieldCheck,
-    label: "Local-first control",
-    description:
-      "Your workspace stays on your machine while the interface stays polished.",
-  },
-] as const;
+import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { Link } from "@/i18n/navigation";
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const t = useTranslations("Auth.Layout");
   const [quoteIndex, setQuoteIndex] = useState(0);
+
+  const quotes = [
+    { text: t("quote1"), author: t("author1") },
+    { text: t("quote2"), author: t("author2") },
+    { text: t("quote3"), author: t("author3") },
+  ];
+
+  const authHighlights = [
+    {
+      icon: Orbit,
+      label: t("highlight1.label"),
+      description: t("highlight1.description"),
+    },
+    {
+      icon: GitBranchPlus,
+      label: t("highlight2.label"),
+      description: t("highlight2.description"),
+    },
+    {
+      icon: ShieldCheck,
+      label: t("highlight3.label"),
+      description: t("highlight3.description"),
+    },
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -55,9 +48,12 @@ export default function AuthLayout({
     }, 4200);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [quotes.length]);
 
-  const quote = quotes[quoteIndex] ?? quotes[0];
+  const quote = quotes[quoteIndex] ?? {
+    text: t("quote1"),
+    author: t("author1"),
+  };
 
   return (
     <div
@@ -89,16 +85,20 @@ export default function AuthLayout({
               <BrandLockup />
             </Link>
 
-            <div
-              className="rounded-full border px-4 py-2 text-[0.68rem] uppercase tracking-[0.28em]"
-              style={{
-                borderColor: "var(--landing-border)",
-                background:
-                  "color-mix(in srgb, var(--landing-surface) 84%, transparent)",
-                color: "var(--landing-text-2)",
-              }}
-            >
-              Secure access
+            <div className="flex items-center gap-2">
+              <LocaleSwitcher />
+              <ThemeToggle />
+              <div
+                className="rounded-full border px-4 py-2 text-[0.68rem] uppercase tracking-[0.28em]"
+                style={{
+                  borderColor: "var(--landing-border)",
+                  background:
+                    "color-mix(in srgb, var(--landing-surface) 84%, transparent)",
+                  color: "var(--landing-text-2)",
+                }}
+              >
+                {t("badge")}
+              </div>
             </div>
           </div>
 
@@ -176,15 +176,21 @@ export default function AuthLayout({
             className="text-xs uppercase tracking-[0.24em]"
             style={{ color: "var(--landing-text-3)" }}
           >
-            © 2026 Nexus
+            {t("copyright")}
           </p>
         </div>
 
         <div className="flex items-center justify-center px-4 py-8 sm:px-6 lg:px-0">
           <div className="w-full max-w-md lg:max-w-[500px]">
-            <Link href="/" className="mb-6 flex items-center gap-3 lg:hidden">
-              <BrandLockup compact={false} />
-            </Link>
+            <div className="mb-6 flex items-center justify-between gap-3 lg:hidden">
+              <Link href="/" className="flex items-center gap-3">
+                <BrandLockup compact={false} />
+              </Link>
+              <div className="flex items-center gap-2">
+                <LocaleSwitcher />
+                <ThemeToggle />
+              </div>
+            </div>
             {children}
           </div>
         </div>

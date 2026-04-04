@@ -1,42 +1,47 @@
 "use client";
-// Needed for scroll-triggered reveal animations.
+// Needed for localized content and scroll-triggered reveal animations.
 
 import { GitGraph, Network, Terminal, Zap } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
+import { useTranslations } from "next-intl";
 
-const features = [
-  {
-    icon: GitGraph,
-    title: "Shared knowledge graph",
-    description:
-      "Every decision, artifact, and insight is captured as reusable project memory, so the next agent starts informed instead of blind.",
-    accent: "var(--node-decision)",
-  },
-  {
-    icon: Terminal,
-    title: "Native terminal sessions",
-    description:
-      "Full PTY sessions keep commands, output, and intent in the same place. No iframe toy terminals or fake command previews.",
-    accent: "var(--node-artifact)",
-  },
-  {
-    icon: Zap,
-    title: "Automatic context injection",
-    description:
-      "Relevant session history, extracted decisions, and linked artifacts flow into each new run automatically and at the right time.",
-    accent: "var(--node-insight)",
-  },
-  {
-    icon: Network,
-    title: "Multi-project continuity",
-    description:
-      "Patterns discovered in one codebase can inform another. Nexus keeps agent work connected at the level teams actually think.",
-    accent: "var(--node-error)",
-  },
+const accents = [
+  "var(--node-decision)",
+  "var(--node-artifact)",
+  "var(--node-insight)",
+  "var(--node-error)",
 ] as const;
 
 export function FeaturesScroll() {
   const shouldReduceMotion = useReducedMotion();
+  const t = useTranslations("Landing.FeaturesScroll");
+
+  const features = [
+    {
+      icon: GitGraph,
+      title: t("feature1.title"),
+      description: t("feature1.description"),
+      accent: accents[0],
+    },
+    {
+      icon: Terminal,
+      title: t("feature2.title"),
+      description: t("feature2.description"),
+      accent: accents[1],
+    },
+    {
+      icon: Zap,
+      title: t("feature3.title"),
+      description: t("feature3.description"),
+      accent: accents[2],
+    },
+    {
+      icon: Network,
+      title: t("feature4.title"),
+      description: t("feature4.description"),
+      accent: accents[3],
+    },
+  ];
 
   return (
     <section id="features" className="relative px-4 py-24 sm:px-6">
@@ -46,21 +51,19 @@ export function FeaturesScroll() {
             className="mb-4 text-xs font-medium uppercase tracking-[0.34em]"
             style={{ color: "var(--landing-text-3)" }}
           >
-            System personality
+            {t("eyebrow")}
           </p>
           <h2
             className="text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-4xl"
             style={{ color: "var(--landing-text-1)" }}
           >
-            A workspace that feels intentional, readable, and deeply alive.
+            {t("title")}
           </h2>
           <p
             className="mt-4 max-w-xl text-base leading-7"
             style={{ color: "var(--landing-text-2)" }}
           >
-            Rich visuals only matter when they improve clarity. Each surface
-            below is designed to make agent orchestration easier to scan and
-            easier to trust.
+            {t("description")}
           </p>
         </div>
 

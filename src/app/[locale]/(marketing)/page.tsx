@@ -1,3 +1,7 @@
+import { notFound } from "next/navigation";
+import { setRequestLocale } from "next-intl/server";
+
+import { isValidLocale } from "@/i18n/messages";
 import { FeaturesScroll } from "./_components/FeaturesScroll";
 import { Footer } from "./_components/Footer";
 import { GraphDemo } from "./_components/GraphDemo";
@@ -7,7 +11,19 @@ import { LogoBar } from "./_components/LogoBar";
 import { Navbar } from "./_components/Navbar";
 import { Testimonials } from "./_components/Testimonials";
 
-export default function LandingPage() {
+export default async function LandingPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+
+  if (!isValidLocale(locale)) {
+    notFound();
+  }
+
+  setRequestLocale(locale);
+
   return (
     <div
       style={{

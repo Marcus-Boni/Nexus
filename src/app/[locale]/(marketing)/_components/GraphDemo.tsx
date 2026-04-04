@@ -1,24 +1,9 @@
 "use client";
-// Needed for subtle reveal animation on the graph demo card.
+
+// Needed for localized content and subtle reveal animation on the graph demo card.
 
 import { motion, useReducedMotion } from "motion/react";
-
-const graphNodes = [
-  { id: "d1", type: "decision", label: "Use Drizzle ORM", x: 120, y: 80 },
-  { id: "a1", type: "artifact", label: "schema.ts", x: 292, y: 46 },
-  { id: "i1", type: "insight", label: "libSQL faster locally", x: 204, y: 176 },
-  { id: "d2", type: "decision", label: "SQLite in dev", x: 400, y: 132 },
-  { id: "e1", type: "error", label: "Migration failed", x: 62, y: 214 },
-  { id: "a2", type: "artifact", label: "db/index.ts", x: 318, y: 242 },
-] as const;
-
-const edges = [
-  { from: "d1", to: "a1" },
-  { from: "d1", to: "i1" },
-  { from: "i1", to: "d2" },
-  { from: "d2", to: "a2" },
-  { from: "e1", to: "i1" },
-] as const;
+import { useTranslations } from "next-intl";
 
 const nodeColors: Record<string, string> = {
   decision: "var(--node-decision)",
@@ -34,19 +19,72 @@ const nodeBorder: Record<string, string> = {
   error: "#ff7a7a",
 };
 
-const legendItems = [
-  { type: "decision", label: "Decision" },
-  { type: "artifact", label: "Artifact" },
-  { type: "insight", label: "Insight" },
-  { type: "error", label: "Error" },
-] as const;
-
-function getNodeById(id: string) {
-  return graphNodes.find((node) => node.id === id);
+function getNodeById(
+  id: string,
+  nodes: Array<{
+    id: string;
+    type: string;
+    label: string;
+    x: number;
+    y: number;
+  }>,
+) {
+  return nodes.find((node) => node.id === id);
 }
 
 export function GraphDemo() {
   const shouldReduceMotion = useReducedMotion();
+  const t = useTranslations("Landing.GraphDemo");
+
+  const graphNodes = [
+    {
+      id: "d1",
+      type: "decision",
+      label: t("nodes.decisionOne"),
+      x: 120,
+      y: 80,
+    },
+    {
+      id: "a1",
+      type: "artifact",
+      label: t("nodes.artifactOne"),
+      x: 292,
+      y: 46,
+    },
+    { id: "i1", type: "insight", label: t("nodes.insightOne"), x: 204, y: 176 },
+    {
+      id: "d2",
+      type: "decision",
+      label: t("nodes.decisionTwo"),
+      x: 400,
+      y: 132,
+    },
+    { id: "e1", type: "error", label: t("nodes.errorOne"), x: 62, y: 214 },
+    {
+      id: "a2",
+      type: "artifact",
+      label: t("nodes.artifactTwo"),
+      x: 318,
+      y: 242,
+    },
+  ];
+
+  const edges = [
+    { from: "d1", to: "a1" },
+    { from: "d1", to: "i1" },
+    { from: "i1", to: "d2" },
+    { from: "d2", to: "a2" },
+    { from: "e1", to: "i1" },
+  ] as const;
+
+  const legendItems = [
+    { type: "decision", label: t("legend.decision") },
+    { type: "artifact", label: t("legend.artifact") },
+    { type: "insight", label: t("legend.insight") },
+    { type: "error", label: t("legend.error") },
+  ];
+
+  const chips = [t("chip1"), t("chip2"), t("chip3")];
 
   return (
     <section id="graph-demo" className="px-4 py-24 sm:px-6">
@@ -56,20 +94,19 @@ export function GraphDemo() {
             className="mb-4 text-xs font-medium uppercase tracking-[0.34em]"
             style={{ color: "var(--landing-text-3)" }}
           >
-            Shared memory
+            {t("eyebrow")}
           </p>
           <h2
             className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl"
             style={{ color: "var(--landing-text-1)" }}
           >
-            Decisions stop disappearing inside terminal scrollback.
+            {t("title")}
           </h2>
           <p
             className="mt-4 text-base leading-7"
             style={{ color: "var(--landing-text-2)" }}
           >
-            The graph view gives structure to what your agents already know, so
-            context can compound instead of resetting every time you swap tools.
+            {t("description")}
           </p>
         </div>
 
@@ -112,11 +149,7 @@ export function GraphDemo() {
 
           <div className="relative">
             <div className="mb-6 flex flex-wrap justify-center gap-2">
-              {[
-                "linked artifacts",
-                "decisions extracted",
-                "handoff context ready",
-              ].map((label) => (
+              {chips.map((label) => (
                 <span
                   key={label}
                   className="rounded-full border px-3 py-1 text-xs uppercase tracking-[0.22em]"
@@ -137,10 +170,10 @@ export function GraphDemo() {
               className="w-full"
               style={{ maxHeight: 340 }}
             >
-              <title>Knowledge graph relationships demo</title>
+              <title>{t("svgTitle")}</title>
               {edges.map((edge) => {
-                const from = getNodeById(edge.from);
-                const to = getNodeById(edge.to);
+                const from = getNodeById(edge.from, graphNodes);
+                const to = getNodeById(edge.to, graphNodes);
 
                 if (!from || !to) {
                   return null;
